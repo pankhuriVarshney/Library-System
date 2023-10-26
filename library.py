@@ -1,5 +1,3 @@
-def libraryRecord(name, bookName, bookID, dateOfIssue ):
-
 def admin():
     print("WELCOME TO ADMIN MODE")
     userStatus=input("Enter 1: To Log-In to your account: \nEnter 2: To switch mode: \nEnter your choice: ")
