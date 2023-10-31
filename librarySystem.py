@@ -1,4 +1,5 @@
-studentInfo={}
+issueRequest={}
+returnRequest={}
 class student:
     id
     def logIn(self):
@@ -25,16 +26,59 @@ class student:
             case _:
                 print("Invalid Choice")
                 self.studentFunctions()
-    def addIssueRequest():
+    def addIssueRequest(self):
         print("WELCOME TO BOOK ISSUE PORTAL")
         with open ("studentIssueRecord.txt","r") as file:
             data=file.readlines()
             for line in data:
                 record=line.split()
                 if(id==record[0]):
-                    if("Late" in )
+                    if("Late" in record):
+                        print("Cannot Make Issue Request: Late Book Return Pending")
+                        self.studentFunctions()
+                    elif("CurrentIssue:5" in record):
+                        print("Cannot Make Issue Request: 5 books already issued")
+                        self.studentFunctions()
+                    else:
+                        bookid=input("Enter the Book ID: ")
+                        present=False
+                        with open ("bookInfo.txt") as file:
+                            data=file.readline()
+                            for line in data:
+                                if(bookid in line):
+                                    present=True
+                                    record=line.split()
+                                    break
+                            if(present):
+                                if("CopyLeft:0" in record):
+                                    print("BOOK NOT AVAILABLE CURRENTLY")
+                                else:
+                                    print("BOOK AVAILABLE")
+                                    issueRequest[id]={"Issue":bookid}
+                                    print("Request Added")
+                            else:
+                                print("BOOK ID NOT FOUND")
+                                self.addIssueRequest()
+                    break
 
-    def addReturnRequest():
+    def addReturnRequest(self):
+        print("WELCOME TO BOOK RETURN PORTAL")
+        with open("studentIssueRecord.txt","r") as file:
+            data=file.readlines()
+            for line in data:
+                if(id in line):
+                    if("CurrentIssue:0" in line):
+                        print("Cannot Make Return Request: No current issues present to return")
+                        self.studentFunctions()
+                    else:
+                        bookid=input("Enter Book ID: ")
+                        if(bookid+":Issued" not in line):
+                            print("Cannot Make Return Request: Book not Issued")
+                            self.studentFunctions()
+                        else:
+                            returnRequest[id]={"Return":bookid}
+                            print("Request Added")                        
+                    break
 
 class admin(student):
     studentObj=student()
@@ -42,7 +86,7 @@ class admin(student):
         print("WELCOME TO ADMIN MODE")
         userLogIn=input("Enter 1: To Log-In to your account: \nEnter 2: To switch mode: \nEnter your choice: ")
         if(userLogIn=='1'):
-            password('A')
+            id=password('A')
         elif(userLogIn=='2'):
             main()
         else:
@@ -54,7 +98,7 @@ class admin(student):
         adminChoice=input("Enter 1: To View Issue/Return Requests\nEnter 2: To View Late Returns\nEnter 3: To View Student Book Issue Records\nEnter 4: To View Student Library Information\nEnter 5: To View Book Information\nEnter 6: To Edit/Add Book Information\nEnter 7: To Add Admin Accounts\nEnter 8: To View and Approve New Student Account\nEnter your choice: ")
         match adminChoice:
             case '1':
-                self.issueRequests()
+                self.Requests()
             case '2':
                 self.pendingReturns()
             case '3':
@@ -73,8 +117,20 @@ class admin(student):
                 print("Invalid Choice")
                 self.adminFunctions()
     
-    def issueRequests():
-
+    def Requests(self):
+        print("WELCOME TO ISSUE/RETURN APPROVAL PORTAL")
+        if(issueRequest=={}):
+            print("No Issue Request")
+        else:
+            print("ISSUE REQUESTS: \n",issueRequest)
+        if(returnRequest=={}):
+            print("No Return Request")
+        else:
+            print("RETURN REQUESTS: \n",returnRequest)
+        choice=input("Enter 1: To Approve A Particular Request\nEnter 2: To Approve All Requests\nEnter 3: To Return to Menu\nEnter your choie: ")
+        match choice:
+            case '1':
+                
     def pendingReturns():
 
     def viewIssueRecord():
