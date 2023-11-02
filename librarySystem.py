@@ -1,9 +1,11 @@
 issueRequest={}
+issuelist=[]
 returnRequest={}
+returnlist=[]
 accountRequest={}
 accountPassword={}
 class student:
-    id
+    id=""
     def logIn(self):
         print("\nWELCOME TO STUDENT MODE")
         userLogIn=input("Enter 1: To Log-In to your account: \nEnter 2: To switch mode: \nEnter your choice: ")
@@ -56,12 +58,16 @@ class student:
                                     print("BOOK NOT AVAILABLE CURRENTLY")
                                 else:
                                     print("BOOK AVAILABLE")
-                                    issueRequest[self.id]={bookid}
+                                    issuelist.append(bookid)
+                                    issueRequest[self.id]=issuelist
                                     print("Request Added")
                             else:
                                 print("BOOK ID NOT FOUND")
                                 self.addIssueRequest()
                     break
+                else:
+                    print("Error: Student Issue Records Unavailable")
+
         self.studentFunctions()
 
     def addReturnRequest(self):
@@ -79,7 +85,8 @@ class student:
                             print("Cannot Make Return Request: Book not Issued")
                             self.studentFunctions()
                         else:
-                            returnRequest[self.id]={bookid}
+                            returnRequest[self.id]=returnlist.append(bookid)
+                            print(returnRequest)
                             print("Request Added")                        
                     break
         self.studentFunctions()
@@ -146,68 +153,79 @@ class admin:
                 match ch:
                     case '1':
                         id=input("Enter the ID to Approve Request of: ")
-                        bookid=issueRequest[id]
+                        books=issueRequest[id]
                         index=0
-                        with open ("studentIssueRecord.txt", "w+") as file:
-                            data=file.readlines()
-                            for line in data:
-                                if(id in line):
-                                    record=line.split("\t")
-                                    break
-                                index+=1
-                            record[1]=str(int(record[1])+1)
-                            record.append("\t"+bookid+":Issued")
-                            data[index]="".join(str(r) for r in record)+"\n"
-                            file.writelines(data)
+                        for bookid in books:
+                            with open ("studentIssueRecord.txt", "r+") as file:
+                                data=file.readlines()
+                                record=[]
+                                for line in data:
+                                    if(id in line):
+                                        record=line.split("\t")
+                                        print(record)
+                                        break
+                                    index+=1
+                                record[1]=str(int(record[1])+1)
+                                record.append(bookid+":Issued")
+                                data[index]="".join(str(r)+"\t" for r in record)+"\n"
+                                file.seek(0)
+                                file.writelines(data)
+                            
+                            index=0
+                            with open ("bookInfo.txt","r+") as file:
+                                data=file.readlines()
+                                record=[]
+                                for line in data:
+                                    if(bookid in line):
+                                        record=line.split("\t")
+                                        break
+                                    index+=1
+                                tag=record[2][:(record[2].index(":")+1)]
+                                num=int(record[2][(record[2].index(":")+1):])
+                                num-=1
+                                record[2]=tag+num
+                                data[index]="".join(str(r) for r in record)+"\n"
+                                file.seek(0)
+                                file.writelines(data)
+                            print(bookid,": Approved")
                         del issueRequest[id]
-                        index=0
-                        with open ("bookInfo.txt","w+") as file:
-                            data=file.readlines()
-                            for line in data:
-                                if(bookid in line):
-                                    record=line.split("\t")
-                                    break
-                                index+=1
-                            tag=record[2][:(record[2].index(":")+1)]
-                            num=int(record[2][(record[2].index(":")+1):])
-                            num-=1
-                            record[2]=tag+num
-                            data[index]="".join(str(r) for r in record)+"\n"
-                            file.writelines(data)
-                        print("Approved")
 
                     case '2':
                         id=input("Enter the ID to Approve Request of: ")
-                        bookid=returnRequest[id]
+                        books=returnRequest[id]
                         index=0
-                        with open ("studentIssueRecord.txt", "w+") as file:
-                            data=file.readlines()
-                            for line in data:
-                                if(id in line):
-                                    record=line.split("\t")
-                                    break
-                                index+=1
-                            record[1]=str(int(record[1])-1)
-                            i=record.index(bookid+":Issued")
-                            record[i]=bookid+":Returned"
-                            data[index]="".join(str(r) for r in record)+"\n"
-                            file.writelines(data)
+                        for bookid in books:
+                            with open ("studentIssueRecord.txt", "r+") as file:
+                                data=file.readlines()
+                                for line in data:
+                                    if(id in line):
+                                        record=line.split("\t")
+                                        break
+                                    index+=1
+                                record[1]=str(int(record[1])-1)
+                                i=record.index(bookid+":Issued")
+                                record[i]=bookid+":Returned"
+                                data[index]="".join(str(r) for r in record)+"\n"
+                                file.seek(0)
+                                file.writelines(data)
+                            index=0
+                            with open ("bookInfo.txt","r+") as file:
+                                data=file.readlines()
+                                record=[]
+                                for line in data:
+                                    if(bookid in line):
+                                        record=line.split("\t")
+                                        break
+                                    index+=1
+                                tag=record[2][0:(record[2].index(":")+1)]
+                                num=int(record[2][(record[2].index(":")+1):])
+                                num+=1
+                                record[2]=tag+num
+                                data[index]="".join(str(r) for r in record)+"\n"
+                                file.writelines(data)
+                            print(bookid,": Approved")
+                        
                         del returnRequest[id]
-                        index=0
-                        with open ("bookInfo.txt","w+") as file:
-                            data=file.readlines()
-                            for line in data:
-                                if(bookid in line):
-                                    record=line.split("\t")
-                                    break
-                                index+=1
-                            tag=record[2][:(record[2].index(":")+1)]
-                            num=int(record[2][(record[2].index(":")+1):])
-                            num+=1
-                            record[2]=tag+num
-                            data[index]="".join(str(r) for r in record)+"\n"
-                            file.writelines(data)
-                        print("Approved")
                     case _:
                         print("Invalid Choice")
             case '2':
@@ -347,7 +365,7 @@ def password(mode):
     with open(pfile,"r") as file:
         data=file.readlines()
         for line in data:
-            if(id and pw in line):
+            if((id in line) and (pw in line)):
                 login=True
                 break
     if(login):
