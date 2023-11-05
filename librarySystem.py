@@ -1,27 +1,29 @@
-
 accountRequest={}
 accountPassword={}
+
 class student:
     id=""
     issueRequest={}
-    issuelist=[]
     returnRequest={}
-    returnlist=[]
+
     def logIn(self):
         print("\nWELCOME TO STUDENT MODE")
         userLogIn=input("Enter 1: To Log-In to your account: \nEnter 2: To switch mode: \nEnter your choice: ")
-        if(userLogIn=='1'):
-            self.id=password('S')
-            self.studentFunctions()
-        elif(userLogIn=='2'):
-            main()
-        else:
-            print("Invalid Choice!")
-            self.logIn()
-        
+        match userLogIn:
+            case '1':
+                self.id=password('S')
+                self.studentFunctions()
+            case '2':
+                self.issuelist=[]
+                self.returnlist=[]
+                main()
+            case _:
+                print("Invalid Choice!")
+                self.logIn()
+            
     def studentFunctions(self):
         print("\nLOGGED IN SUCCESSFULLY")
-        studentChoice=input("Enter 1: To Add Book Issue Request\nEnter 2: To Add Book Return Request\nEnter 3: To View Book Information\nEnter 4: To Log Out\nEnter your choice:")
+        studentChoice=input("Enter 1: To Add Book Issue Request\nEnter 2: To Add Book Return Request\nEnter 3: To View Book Information\nEnter 4: To Log Out\nEnter your choice: ")
         match studentChoice:
             case '1':
                 self.addIssueRequest()
@@ -31,43 +33,50 @@ class student:
                 viewBookInfo()
                 self.studentFunctions()
             case '4':
+                print("LOGGED OUT SUCCESSFULLY")
                 main()
             case _:
                 print("Invalid Choice")
                 self.studentFunctions()
+
     def addIssueRequest(self):
         print("\nWELCOME TO BOOK ISSUE PORTAL")
+        recordpresent=False
         with open ("studentIssueRecord.txt","r") as file:
             data=file.readlines()
             for line in data:
                 if(self.id in line):
+                    recordpresent=True
                     if(' 5 ' in line):
-                        print("Cannot Make Issue Request: 5 books already issued")
+                        print("ERROR: Cannot Make Issue Request: 5 books already issued")
                         self.studentFunctions()
                     else:
                         bookid=input("Enter the Book Reference ID: ")
-                        present=False
+                        bookpresent=False
                         with open ("bookInfo.txt") as file:
                             data=file.readlines()
-                            for line in data:
-                                if(bookid in line):
-                                    present=True
-                                    record=line.split("\t")
-                                    break
-                            if(present):
-                                if("Copies:0" in record):
-                                    print("BOOK NOT AVAILABLE CURRENTLY")
-                                else:
-                                    print("BOOK AVAILABLE")
-                                    self.issuelist.append(bookid)
-                                    self.issueRequest[self.id]=self.issuelist
-                                    print("Request Added")
+                        for line in data:
+                            if(bookid in line):
+                                bookpresent=True
+                                record=line.split("\t")
+                                break
+                        if(bookpresent):
+                            if("Copies:0" in record):
+                                print(f"ERROR: No copies of Book ID: {bookid} are currently available.")
                             else:
-                                print("BOOK ID NOT FOUND")
+                                print("BOOK AVAILABLE")
+                                issuelist=[]
+                                if self.id in self.issueRequest:
+                                    issuelist=self.issueRequest[self.id]
+                                issuelist.append(bookid)
+                                self.issueRequest[self.id]=issuelist
+                                print("SUCCESSFUL QUERY: Request Added")
+                        else:
+                                print(f"ERROR: Book ID: {bookid} Not Found")
                                 self.addIssueRequest()
                     break
-                else:
-                    print("Error: Student Issue Records Unavailable")
+            if(not recordpresent):
+                print("ERROR: Student Issue Records Unavailable. Please contact the Admin")
 
         self.studentFunctions()
 
@@ -75,35 +84,41 @@ class student:
         print("\nWELCOME TO BOOK RETURN PORTAL")
         with open("studentIssueRecord.txt","r") as file:
             data=file.readlines()
-            for line in data:
-                if(self.id in line):
-                    if(' 0 ' in line):
-                        print("Cannot Make Return Request: No current issues present to return")
+        for line in data:
+            if(self.id in line):
+                if(' 0 ' in line):
+                    print("ERROR: Cannot Make Return Request: No current issues present in record")
+                    self.studentFunctions()
+                else:
+                    bookid=input("Enter the Book Reference ID: ")
+                    if(bookid+":Issued" not in line):
+                        print(f"ERROR: Cannot Make Return Request: Book ID: {bookid} not found in record")
                         self.studentFunctions()
                     else:
-                        bookid=input("Enter the Book Reference ID: ")
-                        if(bookid+":Issued" not in line):
-                            print("Cannot Make Return Request: Book not Issued")
-                            self.studentFunctions()
-                        else:
-                            self.returnRequest[self.id]=self.returnlist.append(bookid)
-                            print(self.returnRequest)
-                            print("Request Added")                        
-                    break
+                        returnlist=[]
+                        if self.id in self.returnRequest:
+                            returnlist=self.returnRequest[self.id]
+                        returnlist.append(bookid)
+                        self.returnRequest[self.id]=returnlist
+                        print("SUCCESSFUL QUERY: Request Added")                   
+                break
         self.studentFunctions()
 
+
 class admin(student):
+
     def logIn(self):
         print("\nWELCOME TO ADMIN MODE")
         userLogIn=input("Enter 1: To Log-In to your account: \nEnter 2: To switch mode: \nEnter your choice: ")
-        if(userLogIn=='1'):
-            password('A')
-            self.adminFunctions()
-        elif(userLogIn=='2'):
-            main()
-        else:
-            print("Invalid Choice!")
-            self.logIn()
+        match userLogIn:
+            case '1':
+                password('A')
+                self.adminFunctions()
+            case '2':
+                main()
+            case _:
+                print("Invalid Choice!")
+                self.logIn()
         
     def adminFunctions(self):
         print("\nLOGGED IN SUCCESSFULLY")
@@ -132,108 +147,111 @@ class admin(student):
     
     def Requests(self,student):
         print("\nWELCOME TO ISSUE/RETURN APPROVAL PORTAL")
-        i=False
-        r=False
+        noissues=False
+        noreturns=False
         if(student.issueRequest=={}):
             print("No Issue Request")
-            i=True
+            noissues=True
         else:
             print("ISSUE REQUESTS: \n",student.issueRequest)
         if(student.returnRequest=={}):
             print("No Return Request")
-            r=True
+            noreturns=True
         else:
             print("RETURN REQUESTS: \n",student.returnRequest)
-        if(i and r):
+        if(noissues and noreturns):
             print("NO REQUESTS AVAILABLE. Redirection to Menu")
             self.adminFunctions()
-        choice=input("Enter 1: To Approve A Request\nEnter 2: To Return to Menu\nEnter your choie: ")
+        choice=input("Enter 1: To Approve Issue Request\nEnter 2: To Approve Return Request\nEnter 3: To Return to Menu\nEnter your choie: ")
         match choice:
             case '1':
-                ch=input("Enter 1: To Approve Issue Request\nEnter 2: To Approve Return Request\nEnter your choice: ")
-                match ch:
-                    case '1':
-                        id=input("Enter the ID to Approve Request of: ")
-                        books=student.issueRequest[id]
-                        index=0
-                        for bookid in books:
-                            with open ("studentIssueRecord.txt", "r+") as file:
-                                data=file.readlines()
-                                record=[]
-                                for line in data:
-                                    if(id in line):
-                                        record=line.split("\t")
-                                        print(record)
-                                        break
-                                    index+=1
-                                record[1]=str(int(record[1])+1)
-                                record.append(bookid+":Issued")
-                                data[index]="".join(str(r)+"\t" for r in record)+"\n"
-                                file.seek(0)
-                                file.writelines(data)
-                            
-                            index=0
-                            with open ("bookInfo.txt","r+") as file:
-                                data=file.readlines()
-                                record=[]
-                                for line in data:
-                                    if(bookid in line):
-                                        record=line.split("\t")
-                                        break
-                                    index+=1
-                                tag=record[2][:(record[2].index(":")+1)]
-                                num=int(record[2][(record[2].index(":")+1):])
-                                num-=1
-                                record[2]=tag+str(num)
-                                data[index]="".join(str(r) for r in record)+"\n"
-                                file.seek(0)
-                                file.writelines(data)
-                            print(bookid,": Approved")
-                        del student.issueRequest[id]
+                id=input("Enter the ID to Approve Request of: ")
+                books=student.issueRequest[id]
+                
+                for bookid in books:
+                    index=0
+                    record=[]
+                    with open ("studentIssueRecord.txt", "r+") as file:
+                        data=file.readlines()
+                        for line in data:
+                            if(id in line):
+                                record=line.split("\t")
+                                break
+                            index+=1
+                        record[1]=str(int(record[1])+1)
+                        record.append(bookid+":Issued")
+                        data[index]="".join(str(r)+"\t" for r in record)
+                        file.seek(0)
+                        file.writelines(data)
+                    
+                    index=0
+                    record=[]
+                    with open ("bookInfo.txt","r+") as file:
+                        data=file.readlines()
+                        for line in data:
+                            if(bookid in line):
+                                record=line.split("\t")
+                                break
+                            index+=1
+                        tag=record[2][:(record[2].index(":")+1)]
+                        num=int(record[2][(record[2].index(":")+1):])-1
+                        record[2]=tag+str(num)
+                        data[index]="".join(str(r)+"\t" for r in record)
+                        file.seek(0)
+                        file.writelines(data)
+                    print(bookid,": Approved")
 
-                    case '2':
-                        id=input("Enter the ID to Approve Request of: ")
-                        books=student.returnRequest[id]
-                        index=0
-                        for bookid in books:
-                            with open ("studentIssueRecord.txt", "r+") as file:
-                                data=file.readlines()
-                                for line in data:
-                                    if(id in line):
-                                        record=line.split("\t")
-                                        break
-                                    index+=1
-                                record[1]=str(int(record[1])-1)
-                                i=record.index(bookid+":Issued")
-                                record[i]=bookid+":Returned"
-                                data[index]="".join(str(r) for r in record)+"\n"
-                                file.seek(0)
-                                file.writelines(data)
-                            index=0
-                            with open ("bookInfo.txt","r+") as file:
-                                data=file.readlines()
-                                record=[]
-                                for line in data:
-                                    if(bookid in line):
-                                        record=line.split("\t")
-                                        break
-                                    index+=1
-                                tag=record[2][0:(record[2].index(":")+1)]
-                                num=int(record[2][(record[2].index(":")+1):])
-                                num+=1
-                                record[2]=tag+num
-                                data[index]="".join(str(r) for r in record)+"\n"
-                                file.writelines(data)
-                            print(bookid,": Approved")
-                        
-                        del student.returnRequest[id]
-                    case _:
-                        print("Invalid Choice")
+                print("SUCCESSFUL QUERY: Issue Request Approved")
+                del student.issueRequest[id]
+
             case '2':
+                id=input("Enter the ID to Approve Request of: ")
+                books=student.returnRequest[id]
+                
+                for bookid in books:
+                    index=0
+                    record=[]
+                    with open ("studentIssueRecord.txt", "r+") as file:
+                        data=file.readlines()
+                        for line in data:
+                            if(id in line):
+                                record=line.split("\t")
+                                break
+                            index+=1
+                        record[1]=str(int(record[1])-1)
+                        i=record.index(bookid+":Issued")
+                        record[i]=bookid+":Returned"
+                        data[index]="".join(str(r)+"\t" for r in record)
+                        file.seek(0)
+                        file.writelines(data)
+
+                    index=0
+                    record=[]
+                    with open ("bookInfo.txt","r+") as file:
+                        data=file.readlines()
+                        for line in data:
+                            if(bookid in line):
+                                record=line.split("\t")
+                                break
+                            index+=1
+                        tag=record[2][0:(record[2].index(":")+1)]
+                        num=str(int(record[2][(record[2].index(":")+1):])+1)
+                        record[2]=tag+num
+                        data[index]="".join(str(r)+"\t" for r in record)
+                        file.writelines(data)
+                    print(bookid,": Approved")
+                
+                print("SUCCESSFUL QUERY: Return Request Approved")
+                del student.returnRequest[id]
+                    
+            case '3':
+                print("Redirecting...")
                 self.adminFunctions()
+
             case _:
                 print("Invalid Choice")
                 self.Requests()
+
         self.adminFunctions()
    
     #def pendingReturns():
@@ -243,16 +261,22 @@ class admin(student):
         prn_no = input("Enter PRN NO. To View Issue Record:")
         with open("studentIssueRecord.txt", "r") as file:
             data = file.readlines()
-            present=False
-            for line in data:
-                if prn_no in line:
-                    record=line.split("\t")
-                    present=True
-                    break
-            for r in record:
-                print(r)
+        present=False
+        for line in data:
+            if prn_no in line:
+                record=line.split("\t")
+                present=True
+                break
+
+        print(f"PRN: {record[0]} \nNumber of Active Issues: {record[1]} \nBOOKS:")
+        try:
+            for r in record[2:]:
+                    print(r)
+        except IndexError:
+            print("No Books In Issue Record History")
+
         if not present:
-            print("STUDENT RECORD DOES NOT EXIST")
+            print("ERROR: STUDENT RECORD DOES NOT EXIST")
         self.adminFunctions()
 
     def viewStudentInfo(self):
@@ -261,15 +285,15 @@ class admin(student):
         present=False
         with open("studentInfo.txt", "r") as file:
             data = file.readlines()
-            for line in data:
-                if prn_no in line:
-                    record=line.split("\t")
-                    present=True
-                    break
-            for r in record:
-                print(r)
+        for line in data:
+            if prn_no in line:
+                record=line.split("\t")
+                present=True
+                break
+        for r in record:
+            print(r)
         if not present:
-            print("STUDENT ACCOUNT DOES NOT EXIST")
+            print("ERROR: STUDENT ACCOUNT DOES NOT EXIST")
         self.adminFunctions()
 
     def editBookInfo(self):
@@ -293,22 +317,24 @@ class admin(student):
                 index=0
                 with open ("bookInfo.txt", "r") as file:
                     data=file.readlines()
-                    for line in data:
-                        if(bookid in line):                            
-                            present=True
-                            record=line.split("\t")
-                            break
-                        index+=1
+                for line in data:
+                    if(bookid in line):                            
+                        present=True
+                        record=line.split("\t")
+                        break
+                    index+=1
                 if(not present):
-                    print("BOOK ID INVALID")
+                    print(f"ERROR: Book ID: {bookid} Not fount in record")
                     self.editBookInfo()
                 else:
                     print("The Book Information is: ",record)
                     i=int(input("Enter Index to be Editted: "))
-                    tag=record[i]
-                    colon=record[i].index(":")
-                    tag=tag[:colon+1]
-                    change=input("Enter New "+tag)
+                    if(i>=len(record)):
+                        print("ERROR: Invalid Index")
+                        self.editBookInfo()
+
+                    tag=record[i][:record[i].index(":")+1]
+                    change=input("Enter New "+tag," ")
                     record[i]=tag+change
                     data[index]="".join(str(r+"\t") for r in record)+"\n"
                     with open ("bookInfo.txt","w") as file:
@@ -327,7 +353,8 @@ class admin(student):
     def approveNewAccount(self):
         print("\nWELCOME TO ADD NEW ACCOUNT PORTAL")
         if(accountRequest=={}):
-            print("No New Account Requests")
+            print("No New Account Requests\nRedirecting to Previous Menu")
+            self.adminFunctions()
         else:
             print("New Account Requests: ",accountRequest)
             ch=input("Enter 1: To Approve New Account\nEnter 2: To Return to Previous Menu\nEnter your choice: ")
@@ -344,7 +371,7 @@ class admin(student):
                         file.write(accountPassword[id]+"\n")
                     del accountRequest[id]
                     del accountPassword[id]
-                    print("Account Added")
+                    print("SUCCESSFUL QUERY: Account Added")
                 case '2':
                     self.adminFunctions()
                 case _:
@@ -365,10 +392,10 @@ def password(mode):
     login=False;
     with open(pfile,"r") as file:
         data=file.readlines()
-        for line in data:
-            if((id in line) and (pw in line)):
-                login=True
-                break
+    for line in data:
+        if((id in line) and (pw in line)):
+            login=True
+            break
     if(login):
         return id
     else:
@@ -390,15 +417,16 @@ def viewBookInfo():
     ref_id=input("Enter the Book Reference ID or Name To View Book Info:").upper()
     with open ("bookInfo.txt","r") as file:
         data=file.readlines()
-        for line in data:
-            if ref_id in line:
-                record=line.split("\t")
-                present=True
-                break
-        for r in record:
-            print(r)
+    record=[]
+    for line in data:
+        if ref_id in line:
+            record=line.split("\t")
+            present=True
+            break
+    for r in record:
+        print(r)
     if not present:
-        print("BOOK WITH THIS REFERENCE ID DOES NOT EXIST")
+        print("ERROR: BOOK WITH THIS REFERENCE ID DOES NOT EXIST")
     
 def newAccount():
     print("\nWELCOME TO NEW ACCOUNT")
@@ -418,7 +446,7 @@ def newAccount():
 
 def main():
     print("\nWELCOME TO THE LIBRARY" )
-    mode=input("Enter 1: To Enter Admin Mode\nEnter 2: To Enter Student Mode\nEnter 3: To Create New Student Account\nEnter your choice: ")
+    mode=input("Enter 1: To Enter Admin Mode\nEnter 2: To Enter Student Mode\nEnter 3: To Create New Student Account\nEnter 4: To Exit\nEnter your choice: ")
     match mode:
         case '1':
             adminObj=admin()
@@ -428,6 +456,9 @@ def main():
             studentObj.logIn()
         case '3':
             newAccount()
+        case '4':
+            print("GoodBye")
+            return
         case _:
             print("Invalid Mode")
 
