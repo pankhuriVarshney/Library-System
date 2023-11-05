@@ -1,11 +1,12 @@
-issueRequest={}
-issuelist=[]
-returnRequest={}
-returnlist=[]
+
 accountRequest={}
 accountPassword={}
 class student:
     id=""
+    issueRequest={}
+    issuelist=[]
+    returnRequest={}
+    returnlist=[]
     def logIn(self):
         print("\nWELCOME TO STUDENT MODE")
         userLogIn=input("Enter 1: To Log-In to your account: \nEnter 2: To switch mode: \nEnter your choice: ")
@@ -58,8 +59,8 @@ class student:
                                     print("BOOK NOT AVAILABLE CURRENTLY")
                                 else:
                                     print("BOOK AVAILABLE")
-                                    issuelist.append(bookid)
-                                    issueRequest[self.id]=issuelist
+                                    self.issuelist.append(bookid)
+                                    self.issueRequest[self.id]=self.issuelist
                                     print("Request Added")
                             else:
                                 print("BOOK ID NOT FOUND")
@@ -85,13 +86,13 @@ class student:
                             print("Cannot Make Return Request: Book not Issued")
                             self.studentFunctions()
                         else:
-                            returnRequest[self.id]=returnlist.append(bookid)
-                            print(returnRequest)
+                            self.returnRequest[self.id]=self.returnlist.append(bookid)
+                            print(self.returnRequest)
                             print("Request Added")                        
                     break
         self.studentFunctions()
 
-class admin:
+class admin(student):
     def logIn(self):
         print("\nWELCOME TO ADMIN MODE")
         userLogIn=input("Enter 1: To Log-In to your account: \nEnter 2: To switch mode: \nEnter your choice: ")
@@ -109,7 +110,7 @@ class admin:
         adminChoice=input("Enter 1: To View Issue/Return Requests\nEnter 2: To View Student Book Issue Records\nEnter 3: To View Student Library Information\nEnter 4: To View Book Information\nEnter 5: To Edit/Add Book Information\nEnter 6: To Add Admin Accounts\nEnter 7: To View and Approve New Student Account\nEnter 8: To Log Out\nEnter your choice: ")
         match adminChoice:
             case '1':
-                self.Requests()
+                self.Requests(student)
             case '2':
                 self.viewIssueRecord()
             case '3':
@@ -129,20 +130,20 @@ class admin:
                 print("Invalid Choice")
                 self.adminFunctions()
     
-    def Requests(self):
+    def Requests(self,student):
         print("\nWELCOME TO ISSUE/RETURN APPROVAL PORTAL")
         i=False
         r=False
-        if(issueRequest=={}):
+        if(student.issueRequest=={}):
             print("No Issue Request")
             i=True
         else:
-            print("ISSUE REQUESTS: \n",issueRequest)
-        if(returnRequest=={}):
+            print("ISSUE REQUESTS: \n",student.issueRequest)
+        if(student.returnRequest=={}):
             print("No Return Request")
             r=True
         else:
-            print("RETURN REQUESTS: \n",returnRequest)
+            print("RETURN REQUESTS: \n",student.returnRequest)
         if(i and r):
             print("NO REQUESTS AVAILABLE. Redirection to Menu")
             self.adminFunctions()
@@ -153,7 +154,7 @@ class admin:
                 match ch:
                     case '1':
                         id=input("Enter the ID to Approve Request of: ")
-                        books=issueRequest[id]
+                        books=student.issueRequest[id]
                         index=0
                         for bookid in books:
                             with open ("studentIssueRecord.txt", "r+") as file:
@@ -183,16 +184,16 @@ class admin:
                                 tag=record[2][:(record[2].index(":")+1)]
                                 num=int(record[2][(record[2].index(":")+1):])
                                 num-=1
-                                record[2]=tag+num
+                                record[2]=tag+str(num)
                                 data[index]="".join(str(r) for r in record)+"\n"
                                 file.seek(0)
                                 file.writelines(data)
                             print(bookid,": Approved")
-                        del issueRequest[id]
+                        del student.issueRequest[id]
 
                     case '2':
                         id=input("Enter the ID to Approve Request of: ")
-                        books=returnRequest[id]
+                        books=student.returnRequest[id]
                         index=0
                         for bookid in books:
                             with open ("studentIssueRecord.txt", "r+") as file:
@@ -225,7 +226,7 @@ class admin:
                                 file.writelines(data)
                             print(bookid,": Approved")
                         
-                        del returnRequest[id]
+                        del student.returnRequest[id]
                     case _:
                         print("Invalid Choice")
             case '2':
