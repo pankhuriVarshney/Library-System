@@ -2,3 +2,4 @@ Name:SHRIVALI DUTT	PRN:263	Email ID:shrivali@gmail.com	Contact No.:9997823412	Cl
 Name:NEDHA NIZAMUDEEN	PRN:147	Email ID:nedha@gmail.com	Contact No.:7854763897	Class:CSB3	Batch:2023-27	
 Name:PANKHURI VARSHNEY	PRN:160	Email ID:pankhu@gmail.com	Contact No.:8853213409	Class:CSB3	Batch:2023-27	
 Name:HARSHADA	PRN:103	Email ID:h@gmail.com	Contact No.:9874039850	Class:CSB2	Batch:2023-27	
+Name:STUDENT A	PRN:101	Email ID:student_a@gmail.com	Contact No.:9876543210	Class:CS-B3	Batch:2023-27	
